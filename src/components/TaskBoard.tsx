@@ -1,19 +1,21 @@
 import React, { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import type { Task } from "@/src/types";
 import { TaskItem } from "./TaskItem";
 import { Plus } from "lucide-react";
+import { cn } from "@/src/lib/utils";
 
 interface TaskBoardProps {
   tasks: Task[];
   onAddTask: (text: string) => void;
   onToggleTask: (id: number) => void;
   onDeleteTask: (id: number) => void;
-  onEnterFocus: () => void;
 }
 
-export function TaskBoard({ tasks, onAddTask, onToggleTask, onDeleteTask, onEnterFocus }: TaskBoardProps) {
+export function TaskBoard({ tasks, onAddTask, onToggleTask, onDeleteTask }: TaskBoardProps) {
   const [input, setInput] = React.useState("");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const ringRef = useRef<HTMLDivElement>(null);
   const [ringCenter, setRingCenter] = useState({ x: 0, y: 0 });
@@ -44,6 +46,22 @@ export function TaskBoard({ tasks, onAddTask, onToggleTask, onDeleteTask, onEnte
   const allDone = tasks.length > 0 && completed === tasks.length;
   const isVictory = tasks.length === 3 && completed === 3;
 
+  const [showVictory, setShowVictory] = useState(false);
+  // Initialize to current isVictory. This ensures if we load/switch to a state where it's already 3/3, it doesn't pop up.
+  const prevVictoryRef = useRef(isVictory);
+
+  useEffect(() => {
+    if (isVictory && !prevVictoryRef.current) {
+      setShowVictory(true);
+      const timer = setTimeout(() => {
+        setShowVictory(false);
+      }, 8000); // Extended slightly for naturally slower reading pace
+      
+      return () => clearTimeout(timer);
+    }
+    prevVictoryRef.current = isVictory;
+  }, [isVictory]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -55,6 +73,7 @@ export function TaskBoard({ tasks, onAddTask, onToggleTask, onDeleteTask, onEnte
     
     onAddTask(input.trim());
     setInput("");
+    setIsSheetOpen(false);
   };
 
   const today = new Date().toLocaleDateString('en-US', {
@@ -114,111 +133,141 @@ export function TaskBoard({ tasks, onAddTask, onToggleTask, onDeleteTask, onEnte
               />
             </motion.div>
           ))}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {!isFull && (
-            <motion.form 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              onSubmit={handleSubmit} 
-              className="relative mt-4 md:mt-8"
+          
+          {Array.from({ length: Math.max(0, 3 - tasks.length) }).map((_, i) => (
+            <motion.div
+              layout
+              key={`empty-${i}`}
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              whileHover={i === 0 ? { scale: 1.01, borderColor: "rgba(255,255,255,0.15)" } : {}}
+              whileTap={i === 0 ? { scale: 0.99 } : {}}
+              onClick={() => i === 0 ? setIsSheetOpen(true) : undefined}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className={cn(
+                "flex items-center p-6 md:p-8 rounded-[20px] md:rounded-[24px] border",
+                i === 0 
+                  ? "cursor-pointer bg-white/[0.03] backdrop-blur-2xl border-white/[0.08]" 
+                  : "opacity-40 cursor-default bg-white/[0.01] border-white/[0.04]"
+              )}
             >
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="new task"
-                className="w-full bg-transparent border-b border-white/10 pb-4 pt-4 text-[16px] md:text-[18px] font-extralight text-white placeholder-[rgba(255,255,255,0.2)] focus:outline-none focus:border-white/40 transition-colors tracking-[0.02em] pr-20"
-                autoFocus
-              />
-              <button 
-                type="submit"
-                disabled={!input.trim()}
-                className="absolute right-0 top-4 uppercase text-[10px] md:text-[11px] tracking-[0.2em] text-white/60 hover:text-white disabled:opacity-0 transition-all cursor-pointer px-2 py-1"
-              >
-                Commit
-              </button>
-            </motion.form>
-          )}
+              <span className={cn(
+                "text-[16px] xl:text-[20px] font-light tracking-[-0.01em]",
+                i === 0 ? "text-white/40" : "text-white/10"
+              )}>
+                {i === 0 ? "+ Add Focus Task" : ""}
+              </span>
+            </motion.div>
+          ))}
         </AnimatePresence>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 1 }}
-        className="mt-16 flex flex-col items-center gap-6"
-      >
-        <AnimatePresence>
-          {allDone && !isVictory ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: 10, filter: "blur(10px)" }}
-              className="text-center"
-            >
-              <p className="text-white/60 font-light text-lg">The day is won.</p>
-              <button 
-                onClick={() => tasks.forEach(t => onToggleTask(t.id))} // Quick cheat to reset, just for feeling
-                className="mt-4 text-xs text-white/30 hover:text-white/60 uppercase tracking-[0.2em] transition-colors"
-              >
-                Reset
-              </button>
-            </motion.div>
-          ) : (
-            tasks.length > 0 && !isVictory && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onEnterFocus}
-                className="px-8 py-3 rounded-full bg-white text-black font-medium tracking-wide text-sm hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-500"
-              >
-                Enter Focus
-              </motion.button>
-            )
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {typeof document !== 'undefined' && createPortal(
+        <>
+          <AnimatePresence>
+            {isSheetOpen && (
+              <>
+                {/* Backdrop overlay dimming */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  onClick={() => setIsSheetOpen(false)}
+                  className="fixed inset-0 z-[140] backdrop-blur-[2px] bg-black/40"
+                />
+                
+                {/* Bottom Sheet UI */}
+                <motion.div 
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  transition={{ type: "spring", damping: 30, stiffness: 250 }}
+                  className="fixed bottom-0 left-0 right-0 w-full z-[150] pt-4 pb-8 px-4 sm:px-6 bg-[#0a0a0a]/80 backdrop-blur-xl border-t border-white/[0.08] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.5)]"
+                >
+                  <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
+                  
+                  <form onSubmit={handleSubmit} className="max-w-[580px] mx-auto w-full relative">
+                    <input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Whisper a new intention..."
+                      autoFocus
+                      className="w-full bg-white/95 text-black p-6 md:p-8 rounded-[20px] md:rounded-[24px] text-[16px] xl:text-[20px] font-light tracking-[-0.01em] focus:outline-none placeholder-black/40 pr-24 transition-all"
+                    />
+                    <button 
+                      type="submit"
+                      disabled={!input.trim()}
+                      className="absolute right-6 top-1/2 -translate-y-1/2 uppercase text-[10px] md:text-[11px] tracking-[0.2em] text-black/40 hover:text-black disabled:opacity-0 transition-all font-medium py-2 px-3 pl-4"
+                    >
+                      Done
+                    </button>
+                  </form>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
-      <AnimatePresence>
-        {isVictory && ringCenter.x !== 0 && (
-          <motion.div
-            initial={{ clipPath: `circle(0px at ${ringCenter.x}px ${ringCenter.y}px)` }}
-            animate={{ clipPath: `circle(3000px at ${ringCenter.x}px ${ringCenter.y}px)` }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: [0.4, 0, 0.1, 1] }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#f7f7f7]"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ delay: 0.5, duration: 2, ease: "easeOut" }}
-              className="text-black text-center flex flex-col items-center px-6"
-            >
-              <span className="text-[10px] md:text-[12px] uppercase tracking-[0.4em] text-black/40 mb-6 font-sans">
-                Day Complete
-              </span>
-              <h2 className="text-4xl sm:text-5xl md:text-7xl font-extralight tracking-tight mb-8 text-[#050505]">
-                A quiet mind.
-              </h2>
-              <p className="text-[#050505]/50 font-light text-base md:text-lg mb-12 max-w-[300px] md:max-w-md leading-relaxed text-balance">
-                All intentions fulfilled. The essential has been accomplished. The rest is noise.
-              </p>
-              <button 
-                onClick={() => tasks.forEach(t => onToggleTask(t.id))}
-                className="text-[10px] text-black/40 hover:text-black uppercase tracking-[0.2em] transition-colors border-b border-black/10 hover:border-black/50 pb-1"
+          <AnimatePresence>
+            {showVictory && ringCenter.x !== 0 && (
+              <motion.div
+                initial={{ clipPath: `circle(0px at ${ringCenter.x}px ${ringCenter.y}px)` }}
+                animate={{ clipPath: `circle(4000px at ${ringCenter.x}px ${ringCenter.y}px)` }}
+                exit={{ opacity: 0, filter: "blur(20px)", transition: { duration: 1.2, ease: "easeInOut" } }}
+                transition={{ duration: 3.5, ease: "easeInOut" }}
+                className="fixed inset-0 z-[200] flex items-center justify-center bg-[#f7f7f7]"
               >
-                Begin Anew
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.4,
+                        delayChildren: 0.8,
+                      }
+                    }
+                  }}
+                  className="text-black text-center flex flex-col items-center px-6"
+                >
+                  <motion.span 
+                    variants={{
+                      hidden: { opacity: 0, y: 12, filter: "blur(8px)" },
+                      visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] } }
+                    }}
+                    className="text-[10px] md:text-[12px] uppercase tracking-[0.4em] text-black/40 mb-6 font-sans"
+                  >
+                    Day Complete
+                  </motion.span>
+                  <motion.h2 
+                    variants={{
+                      hidden: { opacity: 0, y: 16, filter: "blur(12px)" },
+                      visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 2, ease: [0.16, 1, 0.3, 1] } }
+                    }}
+                    className="text-4xl sm:text-5xl md:text-7xl font-extralight tracking-tight mb-8 text-[#050505]"
+                  >
+                    A quiet mind.
+                  </motion.h2>
+                  <motion.p 
+                    variants={{
+                      hidden: { opacity: 0, y: 16, filter: "blur(12px)" },
+                      visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 2, ease: [0.16, 1, 0.3, 1] } }
+                    }}
+                    className="text-[#050505]/50 font-light text-base md:text-lg max-w-[300px] md:max-w-md leading-relaxed text-balance"
+                  >
+                    All intentions fulfilled. The essential has been accomplished. The rest is noise.
+                  </motion.p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </motion.div>
   );
 }
