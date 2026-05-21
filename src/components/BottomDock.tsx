@@ -18,9 +18,12 @@ const TABS = [
 
 export function BottomDock({ activeTab, setActiveTab }: BottomDockProps) {
   return (
-    <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-[100] flex items-end justify-center pointer-events-none"
+      style={{ paddingBottom: 'calc(12px + var(--tg-safe-area-inset-bottom, 0px))' }}
+    >
       <motion.div 
-        className="flex items-center gap-1.5 p-1.5 rounded-full bg-[#1c1c1e]/60 backdrop-blur-2xl border border-white/[0.08] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)]"
+        className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-full bg-[#1c1c1e]/60 backdrop-blur-2xl border border-white/[0.08] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)]"
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0, scale: 0.9 }}

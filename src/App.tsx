@@ -14,6 +14,18 @@ export default function App() {
 
   // Load from local storage
   useEffect(() => {
+    // Telegram Web App Initialization
+    if (typeof window !== "undefined" && (window as any).Telegram?.WebApp) {
+      const tg = (window as any).Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      try {
+        tg.setBottomBarColor('#050505');
+      } catch (e) {
+        // Ignored if unsupported
+      }
+    }
+
     try {
       const saved = localStorage.getItem("tasks");
       if (saved) {
