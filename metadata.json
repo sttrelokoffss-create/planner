@@ -1,0 +1,6 @@
+{
+  "name": "Limit Three",
+  "description": "A premium, calm, cinematic meditation and daily focus application, designed with absolute minimalism.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
