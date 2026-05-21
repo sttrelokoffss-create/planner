@@ -2,13 +2,15 @@ import { motion } from "motion/react";
 import { format } from "date-fns";
 import { cn } from "@/src/lib/utils";
 import type { Task } from "@/src/types";
+import { X } from "lucide-react";
 
 interface TaskItemProps {
   task: Task;
   onToggle: (id: number) => void;
+  onDelete: () => void;
 }
 
-export function TaskItem({ task, onToggle }: TaskItemProps) {
+export function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -23,7 +25,7 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
       }}
       onClick={() => onToggle(task.id)}
       className={cn(
-        "group relative flex items-center p-8 cursor-pointer rounded-[24px] transition-colors duration-400 border",
+        "group relative flex items-center p-6 md:p-8 cursor-pointer rounded-[20px] md:rounded-[24px] transition-colors duration-400 border",
         task.done 
           ? "bg-white/95 border-transparent text-black" 
           : "bg-white/[0.03] backdrop-blur-2xl border-white/[0.08]"
@@ -35,7 +37,7 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
             color: task.done ? "#000" : "#fff",
           }}
           className={cn(
-            "text-[20px] font-light tracking-[-0.01em] transition-all duration-400 block",
+            "text-[16px] xl:text-[20px] font-light tracking-[-0.01em] transition-all duration-400 block",
             task.done && "opacity-70"
           )}
         >
@@ -46,7 +48,7 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
       {/* Minimal checkbox indicator */}
       <div 
         className={cn(
-          "ml-4 flex items-center justify-center w-5 h-5 rounded-full border transition-all duration-400",
+          "ml-3 md:ml-4 flex items-center justify-center w-5 h-5 shrink-0 rounded-full border transition-all duration-400",
           task.done ? "border-black bg-black" : "border-white/30"
         )}
       >
@@ -63,6 +65,16 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
           </svg>
         </motion.div>
       </div>
+
+      <button 
+        className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-white/30 hover:text-white/80"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+      >
+        <X size={16} />
+      </button>
     </motion.div>
   );
 }

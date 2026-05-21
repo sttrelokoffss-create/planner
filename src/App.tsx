@@ -13,7 +13,7 @@ export default function App() {
   // Load from local storage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("limit-three-tasks");
+      const saved = localStorage.getItem("tasks");
       if (saved) {
         setTasks(JSON.parse(saved));
       }
@@ -26,7 +26,7 @@ export default function App() {
   // Save to local storage
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem("limit-three-tasks", JSON.stringify(tasks));
+      localStorage.setItem("tasks", JSON.stringify(tasks));
     }
   }, [tasks, isLoaded]);
 
@@ -50,6 +50,10 @@ export default function App() {
     );
   };
 
+  const deleteTask = (id: number) => {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+  };
+
   const completeTask = (id: number) => {
     setTasks((prev) =>
       prev.map((task) =>
@@ -71,6 +75,7 @@ export default function App() {
               tasks={tasks}
               onAddTask={addTask}
               onToggleTask={toggleTask}
+              onDeleteTask={deleteTask}
               onEnterFocus={() => setIsFocusMode(true)}
             />
           </motion.div>

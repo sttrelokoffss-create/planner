@@ -113,7 +113,7 @@ export function FocusMode({ tasks, onExit, onCompleteTask }: FocusModeProps) {
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
               className="text-center max-w-2xl px-6"
             >
-              <h2 className="text-4xl md:text-6xl font-light tracking-tight text-white mb-16 leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-light tracking-tight text-white mb-8 md:mb-16 leading-tight">
                 {activeTask.text}
               </h2>
             </motion.div>
@@ -138,7 +138,7 @@ export function FocusMode({ tasks, onExit, onCompleteTask }: FocusModeProps) {
             {/* Giant Minimal Timer */}
             <div className="relative group flex items-center justify-center">
               {/* Progress Ring */}
-              <svg className="absolute -inset-8 w-[calc(100%+4rem)] h-[calc(100%+4rem)] -rotate-90 pointer-events-none opacity-20">
+              <svg className="absolute -inset-4 md:-inset-8 w-[calc(100%+2rem)] md:w-[calc(100%+4rem)] h-[calc(100%+2rem)] md:h-[calc(100%+4rem)] -rotate-90 pointer-events-none opacity-20">
                 <circle
                   cx="50%"
                   cy="50%"
@@ -163,30 +163,30 @@ export function FocusMode({ tasks, onExit, onCompleteTask }: FocusModeProps) {
               </svg>
 
               <div 
-                className="text-[6rem] md:text-[8rem] font-display font-light tracking-tighter text-white/90 tabular-nums cursor-pointer"
+                className="text-[4.5rem] sm:text-[6rem] md:text-[8rem] font-display font-light tracking-tighter text-white/90 tabular-nums cursor-pointer select-none"
                 onClick={toggleTimer}
               >
                 {formatTime(timeLeft)}
               </div>
             </div>
 
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4 sm:gap-8 mt-4 md:mt-0">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={resetTimer}
-                className="p-4 rounded-full text-white/30 hover:text-white hover:bg-white/5 transition-all"
+                className="p-3 md:p-4 rounded-full text-white/30 hover:text-white hover:bg-white/5 transition-all"
               >
-                <RotateCcw size={24} strokeWidth={1.5} />
+                <RotateCcw size={20} className="md:w-6 md:h-6" strokeWidth={1.5} />
               </motion.button>
               
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={toggleTimer}
-                className="w-20 h-20 rounded-full bg-white text-black flex items-center justify-center hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-500"
+                className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-full bg-white text-black flex items-center justify-center hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-500"
               >
-                {isActive ? <Pause size={32} strokeWidth={1} fill="currentColor" /> : <Play size={32} strokeWidth={1} fill="currentColor" className="ml-2" />}
+                {isActive ? <Pause size={24} className="md:w-8 md:h-8" strokeWidth={1} fill="currentColor" /> : <Play size={24} className="md:w-8 md:h-8 ml-1 md:ml-2" strokeWidth={1} fill="currentColor" />}
               </motion.button>
               
               <motion.button
@@ -196,9 +196,9 @@ export function FocusMode({ tasks, onExit, onCompleteTask }: FocusModeProps) {
                   onCompleteTask(activeTask.id);
                   resetTimer();
                 }}
-                className="px-6 py-4 rounded-full border border-white/20 text-white/70 hover:bg-white hover:text-black transition-all flex items-center gap-2"
+                className="px-5 py-3 md:px-6 md:py-4 rounded-full border border-white/20 text-white/70 hover:bg-white hover:text-black transition-all flex items-center gap-2 shrink-0"
               >
-                <span className="font-medium tracking-wide text-sm">Done</span>
+                <span className="font-medium tracking-wide text-xs md:text-sm">Done</span>
               </motion.button>
             </div>
           </motion.div>
