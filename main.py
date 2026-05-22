@@ -7,6 +7,7 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
     WebAppInfo,
+    FSInputFile
 )
 
 TOKEN = "8914786768:AAGGbd_myVhzsr6qjZvF7v9k0-b0XVkEaLA"
@@ -27,25 +28,11 @@ async def start(message: Message):
                         url="https://planner-self-one.vercel.app/"
                     )
                 )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="◉ Continue Focus",
-                    web_app=WebAppInfo(
-                        url="https://planner-self-one.vercel.app/"
-                    )
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="◉ Review Output",
-                    web_app=WebAppInfo(
-                        url="https://planner-self-one.vercel.app/"
-                    )
-                )
             ]
         ]
     )
+
+    photo = FSInputFile("banner.jpg")
 
     text = """
 OPERATOR ONLINE
@@ -57,8 +44,9 @@ Noise level: Medium
 Momentum: Active
 """
 
-    await message.answer(
-        text,
+    await message.answer_photo(
+        photo=photo,
+        caption=text,
         reply_markup=kb
     )
 
