@@ -22,7 +22,23 @@ async def start(message: Message):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="◉ Open Operator",
+                    text="◉ Enter Operator",
+                    web_app=WebAppInfo(
+                        url="https://planner-self-one.vercel.app/"
+                    )
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="◉ Continue Focus",
+                    web_app=WebAppInfo(
+                        url="https://planner-self-one.vercel.app/"
+                    )
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="◉ Review Output",
                     web_app=WebAppInfo(
                         url="https://planner-self-one.vercel.app/"
                     )
@@ -31,8 +47,18 @@ async def start(message: Message):
         ]
     )
 
+    text = """
+OPERATOR ONLINE
+
+Execution environment ready.
+
+Focus integrity: Stable
+Noise level: Medium
+Momentum: Active
+"""
+
     await message.answer(
-        " ",
+        text,
         reply_markup=kb
     )
 
