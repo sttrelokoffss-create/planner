@@ -223,11 +223,15 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                   exit={{ opacity: 0 }}
                   style={{ willChange: "opacity" }}
                   transition={{ duration: 0.4 }}
-                  onClick={() => setActiveSlotIndex(null)}
+                  onClick={() => {
+                    setActiveSlotIndex(null);
+                    setIsPullingFromStack(false);
+                    setInput("");
+                  }}
                   className="transform-gpu fixed inset-0 z-[140] bg-black/50 backdrop-blur-md pointer-events-auto"
                 />
                 
-                <div className="fixed bottom-0 left-0 right-0 z-[150] w-full pointer-events-auto flex flex-col justify-end h-dvh pointer-events-none">
+                <div className="fixed bottom-0 left-0 right-0 z-[150] w-full flex flex-col justify-end pointer-events-none">
                   <motion.div 
                     layoutId={`empty-slot-${activeSlotIndex}`}
                     style={{ willChange: "transform, opacity" }}

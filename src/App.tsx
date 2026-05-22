@@ -32,8 +32,14 @@ export default function App() {
     try {
       const savedTasks = localStorage.getItem("tasks");
       const savedStack = localStorage.getItem("stackTasks");
-      if (savedTasks) setTasks(JSON.parse(savedTasks));
-      if (savedStack) setStackTasks(JSON.parse(savedStack));
+      if (savedTasks) {
+        const parsed = JSON.parse(savedTasks);
+        if (Array.isArray(parsed)) setTasks(parsed.filter(Boolean));
+      }
+      if (savedStack) {
+        const parsed = JSON.parse(savedStack);
+        if (Array.isArray(parsed)) setStackTasks(parsed.filter(Boolean));
+      }
     } catch (e) {
       console.error(e);
     }
@@ -52,7 +58,7 @@ export default function App() {
 
   const addTask = (text: string) => {
     const today = getTodayStr();
-    const todaysTasks = tasks.filter(t => t.date === today);
+    const todaysTasks = tasks.filter(t => t && t.date === today);
     if (todaysTasks.length >= 3) return;
     
     setTasks((prev) => [
@@ -86,8 +92,9 @@ export default function App() {
   };
 
   const moveStackTaskToFocus = (task: StackTask) => {
+    if (!task) return;
     const today = getTodayStr();
-    const todaysTasks = tasks.filter(t => t.date === today);
+    const todaysTasks = tasks.filter(t => t && t.date === today);
     if (todaysTasks.length >= 3) return; // Full focus
 
     addTask(task.text);
@@ -118,7 +125,7 @@ export default function App() {
 
   // Filter tasks for today's Focus Hub
   const todayStr = getTodayStr();
-  const currentTasks = tasks.filter(t => t.date === todayStr);
+  const currentTasks = tasks.filter(t => t && t.date === todayStr);
 
   const swipeThreshold = 50;
   const tabsOrder: Tab[] = ['analytics', 'focus', 'stack'];
