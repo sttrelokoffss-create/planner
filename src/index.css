@@ -13,11 +13,40 @@
   --color-accent-muted: rgba(255, 255, 255, 0.4);
 }
 
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  body.hide-dock .dock-container {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(20px) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  
+  .dock-container {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer base {
+  html, body, #root {
+    height: 100%;
+    min-height: 100dvh;
+    margin: 0;
+  }
   body {
     @apply bg-matte-black text-white font-sans antialiased selection:bg-white/20 selection:text-white;
     background-color: var(--color-matte-black);
     color: white;
+    /* Edge-to-edge support for mobile */
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
   }
 }
 

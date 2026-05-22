@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { BarChart2, Target, History } from 'lucide-react';
+import { BarChart2, Target, Layers } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
-export type Tab = 'analytics' | 'focus' | 'history';
+export type Tab = 'analytics' | 'focus' | 'stack';
 
 interface BottomDockProps {
   activeTab: Tab;
@@ -13,17 +13,18 @@ interface BottomDockProps {
 const TABS = [
   { id: 'analytics', icon: BarChart2 },
   { id: 'focus', icon: Target },
-  { id: 'history', icon: History },
+  { id: 'stack', icon: Layers },
 ] as const;
 
 export function BottomDock({ activeTab, setActiveTab }: BottomDockProps) {
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 z-[100] flex items-end justify-center pointer-events-none"
-      style={{ paddingBottom: 'calc(12px + var(--tg-safe-area-inset-bottom, 0px))' }}
+      className="fixed left-1/2 -translate-x-1/2 z-[100] dock-container"
+      style={{ bottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1.5rem))' }}
     >
       <motion.div 
-        className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-full bg-[#1c1c1e]/60 backdrop-blur-2xl border border-white/[0.08] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)]"
+        className="transform-gpu flex items-center gap-1.5 p-1.5 rounded-full bg-[rgba(28,28,30,0.6)] backdrop-blur-2xl border border-[rgba(255,255,255,0.08)] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)]"
+        style={{ willChange: "transform, opacity" }}
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0, scale: 0.9 }}
@@ -38,12 +39,13 @@ export function BottomDock({ activeTab, setActiveTab }: BottomDockProps) {
               {isActive && (
                 <motion.div
                   layoutId="active-pill"
-                  className="absolute inset-0 bg-white/[0.12] rounded-full"
+                  style={{ willChange: "transform" }}
+                  className="transform-gpu absolute inset-0 bg-[rgba(255,255,255,0.12)] rounded-full"
                   transition={{ 
                     type: "spring", 
-                    stiffness: 400, 
-                    damping: 24,
-                    mass: 0.6
+                    stiffness: 240, 
+                    damping: 28,
+                    mass: 1
                   }}
                 />
               )}
@@ -55,16 +57,18 @@ export function BottomDock({ activeTab, setActiveTab }: BottomDockProps) {
                 }}
                 onClick={() => setActiveTab(tab.id as Tab)}
                 className={cn(
-                  "relative z-10 w-[64px] h-[48px] flex items-center justify-center transition-colors duration-300 rounded-full cursor-pointer",
+                  "transform-gpu relative z-10 w-[64px] h-[48px] flex items-center justify-center transition-colors duration-300 rounded-full cursor-pointer",
                   isActive ? "text-white" : "text-white/40 hover:text-white/80"
                 )}
                 aria-label={`Go to ${tab.id}`}
+                style={{ willChange: "transform" }}
               >
                 <motion.div
                   animate={{
                     scale: isActive ? 1.15 : 1,
                     y: isActive ? -1 : 0,
                   }}
+                  style={{ willChange: "transform" }}
                   transition={{
                     type: "spring",
                     stiffness: 500,
