@@ -12,13 +12,13 @@ interface StackCardProps {
   onMoveToFocus: (task: StackTask) => void;
 }
 
-export function StackCard({ 
+export const StackCard: React.FC<StackCardProps> = ({ 
   task, 
   stackTasks, 
   onRemove, 
   onMoveToBottom, 
   onMoveToFocus 
-}: StackCardProps) {
+}) => {
   const indexInStack = stackTasks.findIndex(t => t.id === task.id || (t.clientId && t.clientId === task.clientId));
   const i = indexInStack === -1 ? 0 : indexInStack;
   const isCenter = i === 0;
@@ -59,7 +59,7 @@ export function StackCard({
   };
 
   return (
-    <div className="absolute inset-t-0 mx-auto w-full max-w-[340px] h-[200px]" style={{ zIndex: 50 - i }}>
+    <div className="absolute top-12 inset-x-0 mx-auto w-full max-w-[340px] h-[200px]" style={{ zIndex: 50 - i }}>
       {/* Direction Feedback indicators revealed behind the top cards */}
       {isCenter && (
         <>
@@ -100,7 +100,6 @@ export function StackCard({
 
       {/* Main active card */}
       <motion.div
-        layoutId={`stack-card-${task.clientId || task.id}`}
         style={{ 
           willChange: "transform, opacity",
           transformOrigin: "top center",

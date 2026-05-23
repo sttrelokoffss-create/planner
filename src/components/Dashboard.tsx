@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion, LayoutGroup } from 'motion/react';
 import { AmbientBackground } from './AmbientBackground';
 import { TaskBoard } from './TaskBoard';
@@ -7,8 +7,6 @@ import { StackView } from './StackView';
 import { AnalyticsView } from './AnalyticsView';
 import { BottomDock, type Tab } from './BottomDock';
 import { useTasks } from '../context/TaskContext';
-import { VolumeX, Volume2 } from 'lucide-react';
-import { toggleMute, getIsMuted, useAudio } from '../hooks/useAudio';
 
 export const Dashboard = () => {
   const { 
@@ -27,15 +25,6 @@ export const Dashboard = () => {
 
   const [activeTab, setActiveTab] = useState<Tab>('focus');
   const [isFocusMode, setIsFocusMode] = useState(false);
-  const [isMuted, setIsMuted] = useState(getIsMuted());
-  const { play: playClick } = useAudio('click');
-  const { play: playWhoosh } = useAudio('whoosh');
-
-  useEffect(() => {
-    // Keep internal mute state synced
-    const interval = setInterval(() => setIsMuted(getIsMuted()), 500);
-    return () => clearInterval(interval);
-  }, []);
 
   if (!isLoaded) return null;
 
@@ -92,17 +81,6 @@ export const Dashboard = () => {
       <div className="relative h-full text-white font-sans overflow-hidden flex flex-col">
         <AmbientBackground />
         
-        <button
-          onClick={() => {
-            toggleMute();
-            setIsMuted(getIsMuted());
-            if (!getIsMuted()) playClick();
-          }}
-          className="absolute top-6 right-6 z-50 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors pointer-events-auto"
-        >
-          {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-        </button>
-
         <motion.div 
           className="flex-1 relative w-full h-full pointer-events-none"
           drag="x"

@@ -47,9 +47,6 @@
     @apply bg-matte-black text-white font-sans antialiased selection:bg-white/20 selection:text-white;
     background-color: var(--color-matte-black);
     color: white;
-    /* Edge-to-edge support for mobile */
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-top: env(safe-area-inset-top);
   }
 }
 
