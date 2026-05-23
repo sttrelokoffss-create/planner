@@ -31,20 +31,6 @@ export const Dashboard = () => {
   const todayStr = new Date().toISOString().split('T')[0];
   const currentTasks = tasks.filter(t => t && t.date === todayStr);
 
-  const swipeThreshold = 50;
-  const tabsOrder: Tab[] = ['analytics', 'focus', 'stack'];
-  
-  const handleDragEnd = (e: any, info: { offset: { x: number } }) => {
-    if (Math.abs(info.offset.x) < swipeThreshold) return;
-    const currentIndex = tabsOrder.indexOf(activeTab);
-    
-    if (info.offset.x < -swipeThreshold && currentIndex < tabsOrder.length - 1) {
-      setActiveTab(tabsOrder[currentIndex + 1]);
-    } else if (info.offset.x > swipeThreshold && currentIndex > 0) {
-      setActiveTab(tabsOrder[currentIndex - 1]);
-    }
-  };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'analytics':
@@ -81,14 +67,7 @@ export const Dashboard = () => {
       <div className="relative h-full text-white font-sans overflow-hidden flex flex-col">
         <AmbientBackground />
         
-        <motion.div 
-          className="flex-1 relative w-full h-full pointer-events-none"
-          drag="x"
-          dragDirectionLock
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleDragEnd}
-        >
+        <div className="flex-1 relative w-full h-full pointer-events-none">
           <AnimatePresence mode="wait" initial={false}>
             {!isFocusMode ? (
               <motion.div
@@ -117,7 +96,7 @@ export const Dashboard = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
         <AnimatePresence>
           {!isFocusMode && (

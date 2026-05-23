@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion, useMotionValue, useTransform } from 'motion/react';
-import { Trash2, AlertCircle, ArrowUp } from 'lucide-react';
+import { motion, useMotionValue } from 'motion/react';
 import { cn } from '../lib/utils';
 import type { StackTask } from '../types';
 
@@ -27,32 +26,29 @@ export const StackCard: React.FC<StackCardProps> = ({
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
-  // Transformations for directions indicator overlays
-  const purgeOpacity = useTransform(dragX, [-140, -40, 0], [1, 0.15, 0]);
-  const purgeScale = useTransform(dragX, [-140, 0], [1, 0.85]);
-
-  const commitOpacity = useTransform(dragX, [0, 40, 140], [0, 0.15, 1]);
-  const commitScale = useTransform(dragX, [0, 140], [0.85, 1]);
-
-  const bottomOpacity = useTransform(dragY, [-120, -30, 0], [1, 0.15, 0]);
-  const bottomScale = useTransform(dragY, [-120, 0], [1, 0.85]);
-
   // Card stack dimensions and position calculations
   const yOffset = i * 16;
   const scale = Math.max(0.6, 1 - i * 0.08);
 
   const handleDragEnd = (e: any, info: any) => {
     if (!isCenter) return;
-    const { offset } = info;
+    const { offset, velocity } = info;
 
-    if (Math.abs(offset.x) > Math.abs(offset.y)) {
-      if (offset.x < -120) {
+    const SWIPE_THRESHOLD_X = 50; // Ultra-light 50px threshold for effortless swiping
+    const SWIPE_THRESHOLD_Y = 50; // Ultra-light 50px threshold for effortless shuffling
+    const VELOCITY_THRESHOLD = 150; // Lowered velocity requirement to respond to quick flicks
+
+    const absX = Math.abs(offset.x);
+    const absY = Math.abs(offset.y);
+
+    if (absX > absY) {
+      // Horizontal swipe (X-Axis): Left (X < 0) or Right (X > 0) -> Purge / delete task
+      if (absX > SWIPE_THRESHOLD_X || Math.abs(velocity.x) > VELOCITY_THRESHOLD) {
         onRemove(task.id);
-      } else if (offset.x > 120) {
-        onMoveToFocus(task);
       }
     } else {
-      if (offset.y < -100) {
+      // Vertical swipe (Y-Axis): Up (Y < 0) or Down (Y > 0) -> Shuffle front card to bottom of the stack
+      if (absY > SWIPE_THRESHOLD_Y || Math.abs(velocity.y) > VELOCITY_THRESHOLD) {
         onMoveToBottom(task.id);
       }
     }
@@ -60,44 +56,6 @@ export const StackCard: React.FC<StackCardProps> = ({
 
   return (
     <div className="absolute top-12 inset-x-0 mx-auto w-full max-w-[340px] h-[200px]" style={{ zIndex: 50 - i }}>
-      {/* Direction Feedback indicators revealed behind the top cards */}
-      {isCenter && (
-        <>
-          {/* PURGE (Left swipe) */}
-          <motion.div 
-            style={{ opacity: purgeOpacity, scale: purgeScale }}
-            className="absolute right-[-40px] top-1/2 -translate-y-1/2 flex flex-col items-center select-none pointer-events-none z-10 p-2"
-          >
-            <div className="w-12 h-12 rounded-full bg-red-950/40 border border-red-500/20 flex items-center justify-center text-red-500 mb-2 shadow-[0_4px_12px_rgba(239,68,68,0.1)]">
-              <Trash2 size={18} />
-            </div>
-            <span className="text-[9px] uppercase tracking-[0.3em] text-red-400 font-mono">Purge</span>
-          </motion.div>
-
-          {/* COMMIT (Right swipe) */}
-          <motion.div 
-            style={{ opacity: commitOpacity, scale: commitScale }}
-            className="absolute left-[-40px] top-1/2 -translate-y-1/2 flex flex-col items-center select-none pointer-events-none z-10 p-2"
-          >
-            <div className="w-12 h-12 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-2 shadow-[0_4px_12px_rgba(16,185,129,0.1)]">
-              <AlertCircle size={18} className="rotate-180" />
-            </div>
-            <span className="text-[9px] uppercase tracking-[0.3em] text-emerald-400 font-mono">Commit</span>
-          </motion.div>
-
-          {/* ARCHIVE/BOTTOM (Up swipe) */}
-          <motion.div 
-            style={{ opacity: bottomOpacity, scale: bottomScale }}
-            className="absolute inset-x-0 bottom-[-45px] mx-auto flex flex-col items-center select-none pointer-events-none z-10 p-2"
-          >
-            <div className="w-10 h-10 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center text-white/60 mb-1 shadow-md">
-              <ArrowUp size={16} />
-            </div>
-            <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-mono">Postpone</span>
-          </motion.div>
-        </>
-      )}
-
       {/* Main active card */}
       <motion.div
         style={{ 
@@ -125,7 +83,7 @@ export const StackCard: React.FC<StackCardProps> = ({
         )}
         drag={isCenter}
         dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-        dragElastic={isCenter ? 0.8 : 0}
+        dragElastic={isCenter ? 1.0 : 0}
         dragSnapToOrigin={true}
         onDragEnd={handleDragEnd}
       >
@@ -140,4 +98,4 @@ export const StackCard: React.FC<StackCardProps> = ({
       </motion.div>
     </div>
   );
-}
+};
