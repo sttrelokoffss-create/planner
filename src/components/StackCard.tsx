@@ -52,7 +52,7 @@ export const StackCard: React.FC<StackCardProps> = ({
     if (absX > absY && (absX > SWIPE_THRESHOLD || Math.abs(velocity.x) > VELOCITY_THRESHOLD)) {
       const direction = offset.x > 0 ? 1 : -1;
       setExitX(direction * (window.innerWidth || 500));
-      setTimeout(() => onRemove(task.id), 250);
+      setTimeout(() => onRemove(task.id), 150);
     } else if (absY > absX && (absY > SWIPE_THRESHOLD || Math.abs(velocity.y) > VELOCITY_THRESHOLD)) {
       const direction = offset.y > 0 ? 1 : -1;
       setExitY(direction * 220);
@@ -60,7 +60,7 @@ export const StackCard: React.FC<StackCardProps> = ({
         onMoveToBottom(task.id);
         // Reset exit for the case when it goes to bottom
         setExitY(0);
-      }, 250);
+      }, 150);
     } else {
       animate(x, 0, { type: 'spring', stiffness: 300, damping: 25 });
       animate(y, 0, { type: 'spring', stiffness: 300, damping: 25 });
@@ -85,8 +85,8 @@ export const StackCard: React.FC<StackCardProps> = ({
       exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
       transition={{ 
         type: "spring", 
-        stiffness: exitX !== 0 || exitY !== 0 ? 100 : 300, 
-        damping: exitX !== 0 || exitY !== 0 ? 25 : 30 
+        stiffness: exitX !== 0 || exitY !== 0 ? 500 : 350, 
+        damping: exitX !== 0 || exitY !== 0 ? 30 : 25 
       }}
       drag={isCenter}
       dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
