@@ -63,21 +63,24 @@ export function FocusMode({ tasks, onExit, onCompleteTask }: FocusModeProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 1.5 }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-3xl z-0"
+        className="absolute inset-0 bg-[#050505] z-0"
       />
 
-      {/* Focus Breathing Light */}
+      {/* Focus Breathing Light (GPU friendly radial-gradient instead of CSS blur) */}
       <motion.div
         animate={{
           scale: isActive ? [1, 1.05, 1] : 1,
-          opacity: isActive ? [0.2, 0.4, 0.2] : 0.1,
+          opacity: isActive ? [0.25, 0.45, 0.25] : 0.15,
         }}
         transition={{
           duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[80vw] bg-white/10 blur-[120px] rounded-full z-0 pointer-events-none"
+        className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[120vw] z-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)'
+        }}
       />
 
       <div className="relative z-10 w-full flex justify-between items-center max-w-7xl">

@@ -8,9 +8,13 @@ export const initTelegramApp = () => {
     webApp.enableClosingConfirmation();
   }
   if (webApp.setHeaderColor) {
-    try {
-      webApp.setHeaderColor('#000000');
-    } catch(e) {}
+    try { webApp.setHeaderColor('#050505'); } catch(e) {}
+  }
+  if (webApp.setBackgroundColor) {
+    try { webApp.setBackgroundColor('#050505'); } catch(e) {}
+  }
+  if (webApp.setBottomBarColor) {
+    try { webApp.setBottomBarColor('#050505'); } catch(e) {}
   }
 };
 

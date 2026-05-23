@@ -4,6 +4,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { motion, AnimatePresence } from 'motion/react';
 import type { StackTask } from '../types';
 import { cn } from '../lib/utils';
+import { StackCard } from './StackCard';
 
 interface StackViewProps {
   stackTasks: StackTask[];
@@ -44,75 +45,20 @@ export function StackView({
     <div className="w-full h-full pb-[100px] flex flex-col pt-12 px-6 md:px-16 overflow-hidden select-none relative">
       <div className="flex-1 w-full max-w-[400px] mx-auto relative flex flex-col justify-center items-center pointer-events-auto py-8">
         <div className="absolute top-0 left-0 right-0 text-center pointer-events-none">
-          <h2 className="text-white/20 text-[10px] md:text-[11px] font-sans tracking-[0.4em] uppercase">The Stack</h2>
+         <h2 className="text-white/20 text-[10px] md:text-[11px] font-sans tracking-[0.4em] uppercase">Storage Protocol</h2>
         </div>
 
         <AnimatePresence initial={false}>
-          {stackTasks.slice(0, 4).map((task, i) => {
-            const isCenter = i === 0;
-
-            const y = i * 14;
-            const scale = 1 - i * 0.08;
-            const opacity = 1;
-
-            return (
-              <motion.div
-                key={task.clientId || task.id}
-                style={{ 
-                  willChange: "transform, opacity",
-                  transformOrigin: "top center",
-                  boxShadow: isCenter ? "inset 0 1px 1px rgba(255,255,255,0.1), 0 20px 50px -20px rgba(0,0,0,0.8)" : "0 10px 30px -10px rgba(0,0,0,0.8)"
-                }}
-                initial={{ opacity: 0, scale: 1.05, y: -60 }}
-                animate={{ 
-                  opacity, 
-                  scale, 
-                  y, 
-                  zIndex: 50 - i
-                }}
-                exit={{ opacity: 0, scale: 0.9, y: 40 }}
-                transition={{ type: "spring", stiffness: 350, damping: 32, mass: 0.5 }}
-                className={cn(
-                  "transform-gpu absolute top-12 inset-x-0 mx-auto w-full max-w-[340px] h-[200px] rounded-[32px] p-6 flex flex-col justify-center items-center text-center transition-shadow",
-                  isCenter 
-                    ? "bg-[#1c1c1c] border border-[rgba(255,255,255,0.1)] shadow-[0_20px_40px_-20px_rgba(0,0,0,0.8)]" 
-                    : "bg-[#151515] border border-[rgba(255,255,255,0.04)]",
-                  !isCenter ? "pointer-events-none" : "cursor-grab active:cursor-grabbing"
-                )}
-                drag={isCenter}
-                dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                dragElastic={isCenter ? 0.8 : 0}
-                dragSnapToOrigin={true}
-                onDragEnd={(e, info) => {
-                  if (!isCenter) return;
-                  const { offset } = info;
-                  
-                  if (Math.abs(offset.x) > Math.abs(offset.y)) {
-                    // Horizontal swipe
-                    if (offset.x < -120) {
-                      onRemoveStackTask(task.id);
-                    } else if (offset.x > 120) {
-                      onMoveToFocus(task);
-                    }
-                  } else {
-                    // Vertical swipe
-                    if (offset.y < -100) {
-                       onMoveToBottom(task.id);
-                    }
-                  }
-                }}
-              >
-                <div className="w-full max-h-full overflow-hidden flex items-center justify-center pointer-events-none">
-                    <p className={cn(
-                        "font-light tracking-tight leading-snug break-words whitespace-pre-wrap line-clamp-6 transition-all duration-300",
-                        isCenter ? "text-[26px] md:text-[32px] text-white" : "text-[20px] text-white/40"
-                    )}>
-                        {task.text}
-                    </p>
-                </div>
-              </motion.div>
-            );
-          })}
+          {stackTasks.slice(0, 4).map((task) => (
+            <StackCard 
+              key={task.clientId || task.id}
+              task={task}
+              stackTasks={stackTasks}
+              onRemove={onRemoveStackTask}
+              onMoveToBottom={onMoveToBottom}
+              onMoveToFocus={onMoveToFocus}
+            />
+          ))}
         </AnimatePresence>
 
         {stackTasks.length === 0 && (
@@ -122,7 +68,7 @@ export function StackView({
             className="absolute top-12 inset-x-0 mx-auto w-full max-w-[340px] h-[200px] flex flex-col items-center justify-center text-center pointer-events-none"
           >
              <div className="w-full h-full border border-[rgba(255,255,255,0.05)] rounded-[32px] flex flex-col items-center justify-center bg-[#1c1c1c]">
-                <p className="text-white/20 font-extralight tracking-widest uppercase text-[11px] mb-2">Stack is empty</p>
+                <p className="text-white/20 font-extralight tracking-widest uppercase text-[11px] mb-2">Storage empty.</p>
              </div>
           </motion.div>
         )}
@@ -149,10 +95,10 @@ export function StackView({
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsAdding(true)}
             transition={{ type: "spring", stiffness: 240, damping: 28, mass: 1 }}
-            className="transform-gpu flex items-center p-6 md:p-8 rounded-[20px] md:rounded-[24px] border cursor-pointer border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] backdrop-blur-2xl text-white/30 will-change-transform"
+            className="transform-gpu flex items-center p-6 md:p-8 rounded-[20px] md:rounded-[24px] border cursor-pointer border-[rgba(255,255,255,0.05)] bg-[#111] bg-opacity-90 text-white/30 will-change-transform shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
           >
             <span className="text-[16px] xl:text-[20px] font-light tracking-[-0.01em]">
-              New Intention...
+              Initialize intention...
             </span>
           </motion.div>
         )}
@@ -172,18 +118,15 @@ export function StackView({
                   setIsAdding(false);
                   setInput("");
                 }}
-                className="transform-gpu fixed inset-0 z-[140] bg-black/50 backdrop-blur-md pointer-events-auto"
+                className="transform-gpu fixed inset-0 z-[140] bg-black/80 pointer-events-auto"
               />
               
               <div className="fixed bottom-0 left-0 right-0 z-[150] w-full flex flex-col justify-end pointer-events-none">
                 <motion.div 
                   layoutId={`stack-add-slot-${instanceId}`}
                   style={{ willChange: "transform, opacity" }}
-                  onLayoutAnimationComplete={() => {
-                     inputRef.current?.focus();
-                  }}
                   transition={{ type: "spring", stiffness: 240, damping: 28, mass: 1 }}
-                  className="transform-gpu w-full bg-[rgba(26,26,26,0.95)] backdrop-blur-2xl border-t border-[rgba(255,255,255,0.08)] rounded-t-[32px] overflow-hidden pointer-events-auto flex flex-col will-change-transform shadow-[0_-20px_40px_rgba(0,0,0,0.5)] pb-[160px] md:pb-[200px]"
+                  className="transform-gpu w-full bg-[#0a0a0a] border-t border-[rgba(255,255,255,0.08)] rounded-t-[32px] overflow-hidden pointer-events-auto flex flex-col will-change-transform shadow-[0_-20px_40px_rgba(0,0,0,0.8)] pb-[160px] md:pb-[200px]"
                 >
                   <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-4 mb-2 shrink-0" />
                   
@@ -192,9 +135,10 @@ export function StackView({
                       <div className="relative">
                         <TextareaAutosize
                           ref={inputRef}
+                          autoFocus
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
-                          placeholder="New Intention..."
+                          placeholder="Initialize intention..."
                           minRows={1}
                           maxRows={5}
                           onKeyDown={(e) => {

@@ -2,31 +2,41 @@ import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import type { Task } from '../types';
 import { cn } from '../lib/utils';
+import { triggerHaptic } from '../lib/telegram';
 
 interface AnalyticsViewProps {
   tasks: Task[];
 }
 
-const GridSquare = React.memo(({ done }: { done: number }) => {
+const GridSquare = React.memo(({ done, delay }: { done: number, delay: number }) => {
   let bg = "bg-[#111111] border border-[rgba(255,255,255,0.04)]";
-  if (done >= 3) bg = "bg-white shadow-[0_0_15px_rgba(255,255,255,0.4)]";
-  else if (done === 2) bg = "bg-white/40";
-  else if (done === 1) bg = "bg-white/15";
+  let glow = "";
+  if (done >= 3) {
+    bg = "bg-white";
+    glow = "shadow-[0_0_15px_rgba(255,255,255,0.4)]";
+  } else if (done === 2) {
+    bg = "bg-white/40";
+  } else if (done === 1) {
+    bg = "bg-white/15";
+  }
   
   return (
-    <div className={cn("transform-gpu aspect-square rounded-[4px] md:rounded-[6px] transition-all", bg)} style={{ willChange: "transform, opacity" }} />
+    <motion.div 
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.4, delay: delay * 0.01 }}
+      className={cn("transform-gpu aspect-square rounded-[4px] md:rounded-[6px] transition-all", bg, glow)} 
+      style={{ willChange: "transform, opacity" }} 
+    />
   );
-}, (prev, next) => prev.done === next.done);
+}, (prev, next) => prev.done === next.done && prev.delay === next.delay);
 
 export function AnalyticsView({ tasks }: AnalyticsViewProps) {
-  // Compute analytics
   const today = new Date();
   
-  const { streak, heatmapData, executionRate } = useMemo(() => {
-    // 1. Group tasks by date
+  const { streak, heatmapData, executionRate, recentRhythm } = useMemo(() => {
     const dailyStats: Record<string, { total: number, done: number }> = {};
     
-    // We assume task.date is 'YYYY-MM-DD'
     tasks.forEach(t => {
       if (!dailyStats[t.date]) {
         dailyStats[t.date] = { total: 0, done: 0 };
@@ -35,11 +45,10 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
       if (t.done) dailyStats[t.date].done++;
     });
 
-    // 2. Generate last 28 days data
-    const last28Days = [];
     const heatmap = [];
     let currentStreak = 0;
     let isStreakActive = true;
+    const rhythm = [];
     
     for (let i = 0; i < 28; i++) {
       const d = new Date(today);
@@ -47,19 +56,12 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
       const dateStr = d.toISOString().split('T')[0];
       
       const stats = dailyStats[dateStr] || { total: 0, done: 0 };
-      const isPerfect = stats.total > 0 && stats.done === stats.total;
-      
-      // A healthy day implies they created tasks and finished them all. Given standard is 3 max, 
-      // let's say they must finish 3/3 to keep streak, OR if they created < 3 but finished them, maybe it's also win?
-      // "если за день не закрыты все задачи." => stats.total > 0 && stats.done === stats.total.
-      // But if stats.total === 0, they didn't even plan. So streak breaks.
       const isWin = stats.total > 0 && stats.done === stats.total;
       
       if (isStreakActive) {
         if (isWin) {
           currentStreak++;
         } else if (i > 0) {
-          // Break streak only if not today
           isStreakActive = false;
         }
       }
@@ -69,54 +71,106 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
         done: stats.done,
         total: stats.total
       });
+
+      if (i < 7) {
+        rhythm.unshift(stats.total === 0 ? 0 : (stats.done / stats.total) * 100);
+      }
     }
 
-    // 3. Execution rate
     const totalCreated = tasks.length;
     const totalDone = tasks.filter(t => t.done).length;
     const rate = totalCreated === 0 ? 0 : Math.round((totalDone / totalCreated) * 100);
 
-    return { streak: currentStreak, heatmapData: heatmap, executionRate: rate };
+    return { 
+      streak: currentStreak, 
+      heatmapData: heatmap, 
+      executionRate: rate,
+      recentRhythm: rhythm 
+    };
   }, [tasks]);
 
+  const sparklinePath = useMemo(() => {
+    if (recentRhythm.length === 0) return "";
+    const minX = 0;
+    const maxX = 100;
+    const minY = 30; // height
+    const maxY = 0;
+    
+    const points = recentRhythm.map((val, i) => {
+      const x = (i / (recentRhythm.length - 1)) * maxX;
+      const y = minY - (val / 100) * minY;
+      return `${x},${y}`;
+    });
+    
+    return `M${points.join(' L')}`;
+  }, [recentRhythm]);
+
   return (
-    <div className="w-full h-full pb-[120px] overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center px-6">
-      <div className="max-w-[400px] w-full flex flex-col items-center">
+    <div className="w-full h-full pb-[120px] overflow-y-auto overflow-x-hidden flex flex-col pt-12 px-6">
+      <div className="absolute top-0 left-0 right-0 text-center pointer-events-none mt-12 z-0">
+         <h2 className="text-white/20 text-[10px] md:text-[11px] font-sans tracking-[0.4em] uppercase">Operator Status</h2>
+      </div>
+
+      <div className="max-w-[400px] w-full mx-auto flex flex-col gap-6 mt-16 pb-8 z-10">
         <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 1 }}
-          className="text-center mb-16"
+          onClick={() => triggerHaptic('light')}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full bg-[#111] bg-opacity-90 border-[rgba(255,255,255,0.06)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.5)] rounded-[32px] p-8 flex flex-col items-center justify-center relative overflow-hidden"
         >
-          <div className="text-[64px] md:text-[84px] font-extralight leading-[0.9] text-white">
-            {streak}
-          </div>
-          <div className="text-[10px] md:text-[12px] uppercase tracking-[0.4em] text-white/40 mt-4">
-            Days Momentum
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50" />
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 1 }}
+            className="text-center relative z-10"
+          >
+            <div className="text-[64px] md:text-[84px] font-extralight leading-[0.9] text-white">
+              {streak}
+            </div>
+            <div className="text-[10px] md:text-[12px] uppercase tracking-[0.4em] text-white/40 mt-3 font-sans">
+              Days Momentum
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           transition={{ delay: 0.3, duration: 1 }}
+           className="w-full bg-[#111] bg-opacity-90 border-[rgba(255,255,255,0.06)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.5)] rounded-[32px] p-8 relative overflow-hidden flex flex-col"
+        >
+           <h3 className="text-white/50 text-xs font-sans tracking-[0.2em] uppercase mb-6">Execution Rhythm</h3>
+           <div className="w-full flex-1 min-h-[50px] relative flex items-end">
+             {/* Graph Line */}
+             <svg width="100%" height="30" viewBox="0 0 100 30" preserveAspectRatio="none" className="overflow-visible absolute inset-0 w-full h-[30px] bottom-0">
+                {/* Glow behind the line */}
+                <path d={sparklinePath} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="blur-[4px]" />
+                {/* Main line */}
+                <path d={sparklinePath} fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+             </svg>
+             <div className="w-full flex justify-between absolute bottom-[-20px]">
+                {recentRhythm.map((_, i) => (
+                   <div key={i} className="w-1 h-1 rounded-full bg-white/20" />
+                ))}
+             </div>
+           </div>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 1 }}
-          className="w-full mb-16"
+          className="w-full bg-[#111] bg-opacity-90 border-[rgba(255,255,255,0.06)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.5)] rounded-[32px] p-8"
         >
+          <div className="flex justify-between items-end mb-6">
+             <h3 className="text-white/50 text-xs font-sans tracking-[0.2em] uppercase">Execution Heatmap</h3>
+             <span className="text-white font-medium text-sm">{executionRate}% AVG</span>
+          </div>
           <div className="grid grid-cols-7 gap-2 md:gap-3">
             {heatmapData.map((day, i) => (
-              <GridSquare key={day.date} done={day.done} />
+              <GridSquare key={day.date} done={day.done} delay={i} />
             ))}
-          </div>
-        </motion.div>
-        
-        <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           transition={{ delay: 0.6, duration: 1 }}
-           className="w-full pt-8 border-t border-[rgba(255,255,255,0.08)] text-center"
-        >
-          <div className="text-white/60 font-light text-lg">
-            Execution Rate: <span className="text-white font-medium ml-1">{executionRate}%</span>
           </div>
         </motion.div>
       </div>

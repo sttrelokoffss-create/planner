@@ -162,7 +162,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
-          className="w-[90px] h-[90px] sm:w-[120px] sm:h-[120px] md:w-[180px] md:h-[180px] rounded-full border border-white/10 flex flex-col justify-center items-center bg-[rgba(255,255,255,0.02)] backdrop-blur-[10px] shadow-[0_0_40px_rgba(0,0,0,0.5)] shrink-0"
+          className="w-[90px] h-[90px] sm:w-[120px] sm:h-[120px] md:w-[180px] md:h-[180px] rounded-full border border-[rgba(255,255,255,0.08)] flex flex-col justify-center items-center bg-[#111] bg-opacity-90 shadow-[0_4px_32px_rgba(0,0,0,0.5)] shrink-0"
         >
           <div className="text-[28px] sm:text-[36px] md:text-[48px] font-extralight leading-none">{completed}/{tasks.length || 3}</div>
           <div className="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-white/40 mt-1">Day Score</div>
@@ -202,10 +202,10 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveSlotIndex(i)}
                 transition={{ type: "spring", stiffness: 240, damping: 28, mass: 1 }}
-                className="transform-gpu flex items-center p-6 md:p-8 rounded-[20px] md:rounded-[24px] border cursor-pointer border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] backdrop-blur-2xl text-white/30 will-change-transform"
+                className="transform-gpu flex items-center p-6 md:p-8 rounded-[20px] md:rounded-[24px] border cursor-pointer border-[rgba(255,255,255,0.05)] bg-[#111] bg-opacity-90 text-white/30 will-change-transform shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
               >
                 <span className="text-[16px] xl:text-[20px] font-light tracking-[-0.01em]">
-                  + Add Focus Task
+                  + Add Execution Target
                 </span>
               </motion.div>
             );
@@ -229,18 +229,15 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                     setIsPullingFromStack(false);
                     setInput("");
                   }}
-                  className="transform-gpu fixed inset-0 z-[140] bg-black/50 backdrop-blur-md pointer-events-auto"
+                  className="transform-gpu fixed inset-0 z-[140] bg-black/80 pointer-events-auto"
                 />
                 
                 <div className="fixed bottom-0 left-0 right-0 z-[150] w-full flex flex-col justify-end pointer-events-none">
                   <motion.div 
                     layoutId={`empty-slot-${instanceId}-${activeSlotIndex}`}
                     style={{ willChange: "transform, opacity" }}
-                    onLayoutAnimationComplete={() => {
-                        inputRef.current?.focus();
-                    }}
                     transition={{ type: "spring", stiffness: 240, damping: 28, mass: 1 }}
-                    className="transform-gpu w-full bg-[rgba(26,26,26,0.95)] backdrop-blur-2xl border-t border-[rgba(255,255,255,0.08)] rounded-t-[32px] overflow-hidden pointer-events-auto flex flex-col will-change-transform shadow-[0_-20px_40px_rgba(0,0,0,0.5)] pb-[160px] md:pb-[200px]"
+                    className="transform-gpu w-full bg-[#0a0a0a] border-t border-[rgba(255,255,255,0.08)] rounded-t-[32px] overflow-hidden pointer-events-auto flex flex-col will-change-transform shadow-[0_-20px_40px_rgba(0,0,0,0.8)] pb-[160px] md:pb-[200px]"
                   >
                     <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-4 mb-2 shrink-0" />
                     
@@ -276,15 +273,16 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                               className="flex items-center gap-2 self-start px-4 py-2 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] rounded-full text-white/80 hover:bg-[rgba(255,255,255,0.1)] transition-colors"
                             >
                               <Layers size={14} className="text-white/50" />
-                              <span className="text-[12px] font-medium tracking-wide">Choose from Stack</span>
+            <span className="text-[12px] font-medium tracking-wide">Import from Storage</span>
                             </button>
                           )}
                           <div className="relative">
                             <TextareaAutosize
                               ref={inputRef}
+                              autoFocus
                               value={input}
                               onChange={(e) => setInput(e.target.value)}
-                              placeholder="New Intention..."
+                              placeholder="Define clear execution target..."
                               minRows={1}
                               maxRows={5}
                               onKeyDown={(e) => {

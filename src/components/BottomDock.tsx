@@ -23,7 +23,7 @@ export function BottomDock({ activeTab, setActiveTab }: BottomDockProps) {
       style={{ bottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1.5rem))' }}
     >
       <motion.div 
-        className="transform-gpu flex items-center gap-1.5 p-1.5 rounded-full bg-[rgba(28,28,30,0.6)] backdrop-blur-2xl border border-[rgba(255,255,255,0.08)] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)]"
+        className="transform-gpu flex items-center gap-1.5 p-1.5 rounded-[40px] bg-[#1a1a1a] bg-opacity-95 border border-[rgba(255,255,255,0.08)] shadow-[0_20px_40px_-8px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.1)]"
         style={{ willChange: "transform, opacity" }}
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

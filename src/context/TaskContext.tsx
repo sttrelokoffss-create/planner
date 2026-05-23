@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { loadTasks, createTask, updateTask, deleteTask as deleteSupabaseTask } from '../services/taskService';
 import type { Task, StackTask } from '../types';
 import { triggerHaptic } from '../lib/telegram';
+import { playCinematicSound } from '../hooks/useAudio';
 
 interface TaskContextType {
   tasks: Task[];
@@ -78,6 +79,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const clientId = crypto.randomUUID();
     setTasks(prev => [...prev, { id: tempId, clientId, text, done: false, date: today }]);
     triggerHaptic('medium');
+    playCinematicSound('click');
     
     try {
       const savedTask = await createTask(text);
@@ -103,6 +105,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const clientId = crypto.randomUUID();
     setStackTasks(prev => [{ id: tempId, clientId, text, createdAt: Date.now() }, ...prev]);
     triggerHaptic('medium');
+    playCinematicSound('click');
     try {
       const saved = await createTask(`STACK::${text}`);
       if (saved) {
@@ -127,6 +130,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     try {
       await deleteSupabaseTask(parseInt(id));
       triggerHaptic('light');
+      playCinematicSound('whoosh');
     } catch (e: any) {
       console.error(e);
       alert("Error deleting: " + (e.message || JSON.stringify(e)));
@@ -159,6 +163,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const clientId = crypto.randomUUID();
     setTasks(prev => [...prev, { id: tempId, clientId, text: task.text, done: false, date: today }]);
     triggerHaptic('medium');
+    playCinematicSound('success');
 
     try {
       await deleteSupabaseTask(parseInt(task.id));
@@ -188,6 +193,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done: newDone } : t));
     triggerHaptic('medium');
+    playCinematicSound(newDone ? 'success' : 'whoosh');
     
     try {
       await updateTask(id, { done: newDone });
@@ -202,6 +208,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const taskToDelete = tasks.find(t => t.id === id);
     setTasks(prev => prev.filter((task) => task.id !== id));
     triggerHaptic('soft');
+    playCinematicSound('whoosh');
     
     try {
       await deleteSupabaseTask(id);
@@ -215,6 +222,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const completeTask = async (id: number) => {
     setTasks(prev => prev.map((task) => task.id === id ? { ...task, done: true } : task));
     triggerHaptic('heavy');
+    playCinematicSound('complete');
     
     try {
       await updateTask(id, { done: true });
