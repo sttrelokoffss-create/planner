@@ -57,8 +57,7 @@ export function StackView({
 
             return (
               <motion.div
-                key={task.id}
-                layout
+                key={task.clientId || task.id}
                 style={{ 
                   willChange: "transform, opacity",
                   transformOrigin: "top center",
@@ -86,18 +85,20 @@ export function StackView({
                 dragSnapToOrigin={true}
                 onDragEnd={(e, info) => {
                   if (!isCenter) return;
-                  const { offset, velocity } = info;
-                  const swipeThreshold = 60;
-                  const velocityThreshold = 400;
-
-                  if (Math.abs(offset.x) > Math.abs(offset.y) && Math.abs(offset.x) > swipeThreshold) {
-                    if (offset.x < 0 || velocity.x < -velocityThreshold) {
+                  const { offset } = info;
+                  
+                  if (Math.abs(offset.x) > Math.abs(offset.y)) {
+                    // Horizontal swipe
+                    if (offset.x < -120) {
                       onRemoveStackTask(task.id);
-                    } else if (offset.x > 0 || velocity.x > velocityThreshold) {
+                    } else if (offset.x > 120) {
                       onMoveToFocus(task);
                     }
-                  } else if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
-                     onMoveToBottom(task.id);
+                  } else {
+                    // Vertical swipe
+                    if (offset.y < -100) {
+                       onMoveToBottom(task.id);
+                    }
                   }
                 }}
               >

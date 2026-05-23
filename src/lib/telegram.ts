@@ -1,44 +1,37 @@
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp: {
-        expand: () => void;
-        isVersionAtLeast: (version: string) => boolean;
-        setHeaderColor: (color: string) => void;
-        setBackgroundColor: (color: string) => void;
-        setBottomBarColor: (color: string) => void;
-        initDataUnsafe?: {
-          user?: {
-            id: number;
-            [key: string]: any;
-          };
-        };
-      };
-    };
-  }
-}
+const webApp = window.Telegram?.WebApp || (window as any).Telegram?.WebApp;
 
 export const initTelegramApp = () => {
-  if (typeof window === 'undefined' || !window.Telegram?.WebApp) {
-    return;
+  if (!webApp) return;
+  webApp.ready();
+  webApp.expand();
+  if (webApp.enableClosingConfirmation) {
+    webApp.enableClosingConfirmation();
   }
-  
-  const tg = window.Telegram.WebApp;
-  tg.expand();
-  
-  if (tg.isVersionAtLeast && tg.isVersionAtLeast('6.1')) {
-    tg.setHeaderColor('#050505');
-    tg.setBackgroundColor('#050505');
-  }
-  
-  if (tg.isVersionAtLeast && tg.isVersionAtLeast('7.10')) {
-    tg.setBottomBarColor('#050505');
+  if (webApp.setHeaderColor) {
+    try {
+      webApp.setHeaderColor('#000000');
+    } catch(e) {}
   }
 };
 
+export const getTelegramUser = () => webApp?.initDataUnsafe?.user;
+
 export const getTelegramUserId = () => {
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-    return window.Telegram.WebApp.initDataUnsafe.user.id;
+  const id = webApp?.initDataUnsafe?.user?.id;
+  if (!id) {
+    throw new Error('Unauthorized: Telegram Identity Missing');
   }
-  return null;
+  return id;
+};
+
+export const triggerHaptic = (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => {
+  if (webApp?.HapticFeedback) {
+    webApp.HapticFeedback.impactOccurred(style);
+  }
+};
+
+export const triggerNotificationFeedback = (type: 'error' | 'success' | 'warning') => {
+  if (webApp?.HapticFeedback) {
+    webApp.HapticFeedback.notificationOccurred(type);
+  }
 };

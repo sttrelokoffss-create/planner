@@ -29,13 +29,15 @@ export const TaskItem = React.memo(({ task, onToggle, onDelete }: TaskItemProps)
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.8}
       onDragEnd={(e, info) => {
-        const threshold = 80;
-        const velocityThreshold = 400;
-        if (Math.abs(info.offset.x) > threshold || Math.abs(info.velocity.x) > velocityThreshold) {
+        const threshold = 120;
+        if (info.offset.x < -threshold) {
           onDelete();
         }
       }}
-      onClick={() => onToggle(task.id)}
+      onClick={(e) => {
+        // Prevent toggle if we dragged slightly
+        onToggle(task.id);
+      }}
       className={cn(
         "transform-gpu group relative flex items-center p-6 md:p-8 cursor-grab active:cursor-grabbing rounded-[20px] md:rounded-[24px] transition-colors duration-400 border",
         task.done 

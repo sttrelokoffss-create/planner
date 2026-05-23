@@ -172,7 +172,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
       <div className="flex-1 max-w-[580px] w-full mx-auto space-y-4">
         <AnimatePresence>
           {tasks.map((task) => (
-            <motion.div layout key={task.id}>
+            <motion.div layout key={task.clientId || task.id}>
               <TaskItem 
                 task={task} 
                 onToggle={onToggleTask} 
