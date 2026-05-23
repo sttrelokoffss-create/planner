@@ -134,33 +134,10 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
           </motion.div>
         </motion.div>
 
-        <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           transition={{ delay: 0.3, duration: 1 }}
-           className="w-full bg-[#111] bg-opacity-90 border-[rgba(255,255,255,0.06)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.5)] rounded-[32px] p-8 relative overflow-hidden flex flex-col"
-        >
-           <h3 className="text-white/50 text-xs font-sans tracking-[0.2em] uppercase mb-6">Execution Rhythm</h3>
-           <div className="w-full flex-1 min-h-[50px] relative flex items-end">
-             {/* Graph Line */}
-             <svg width="100%" height="30" viewBox="0 0 100 30" preserveAspectRatio="none" className="overflow-visible absolute inset-0 w-full h-[30px] bottom-0">
-                {/* Glow behind the line */}
-                <path d={sparklinePath} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="blur-[4px]" />
-                {/* Main line */}
-                <path d={sparklinePath} fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-             </svg>
-             <div className="w-full flex justify-between absolute bottom-[-20px]">
-                {recentRhythm.map((_, i) => (
-                   <div key={i} className="w-1 h-1 rounded-full bg-white/20" />
-                ))}
-             </div>
-           </div>
-        </motion.div>
-
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 1 }}
+          transition={{ delay: 0.3, duration: 1 }}
           className="w-full bg-[#111] bg-opacity-90 border-[rgba(255,255,255,0.06)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.5)] rounded-[32px] p-8"
         >
           <div className="flex justify-between items-end mb-6">

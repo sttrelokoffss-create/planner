@@ -40,7 +40,7 @@ const App = () => {
         <AnimatePresence>
           {showIntro && <CinematicIntro onComplete={() => setShowIntro(false)} />}
         </AnimatePresence>
-        {!showIntro && <Dashboard />}
+        <Dashboard />
       </div>
     </TaskProvider>
   );
