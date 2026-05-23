@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import TextareaAutosize from "react-textarea-autosize";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,6 +17,7 @@ interface TaskBoardProps {
 }
 
 export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onToggleTask, onDeleteTask }: TaskBoardProps) {
+  const instanceId = useId();
   const [input, setInput] = React.useState("");
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [isPullingFromStack, setIsPullingFromStack] = useState(false);
@@ -130,10 +131,10 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
 
   return (
     <motion.div 
-      initial={{ opacity: 0, filter: "blur(20px)" }}
-      animate={{ opacity: 1, filter: "blur(0px)" }}
-      exit={{ opacity: 0, filter: "blur(20px)", scale: 0.95 }}
-      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="w-full max-w-[1024px] mx-auto flex flex-col h-full z-10 relative px-6 md:px-16 py-8 md:py-16"
     >
       <header className="mb-12 md:mb-16 flex flex-row items-center md:items-start justify-between gap-4">
@@ -169,7 +170,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
       </header>
 
       <div className="flex-1 max-w-[580px] w-full mx-auto space-y-4">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence>
           {tasks.map((task) => (
             <motion.div layout key={task.id}>
               <TaskItem 
@@ -191,7 +192,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
 
             return (
               <motion.div
-                layoutId={`empty-slot-${i}`}
+                layoutId={`empty-slot-${instanceId}-${i}`}
                 key={`empty-${i}`}
                 style={{ willChange: "transform, opacity" }}
                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -233,7 +234,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                 
                 <div className="fixed bottom-0 left-0 right-0 z-[150] w-full flex flex-col justify-end pointer-events-none">
                   <motion.div 
-                    layoutId={`empty-slot-${activeSlotIndex}`}
+                    layoutId={`empty-slot-${instanceId}-${activeSlotIndex}`}
                     style={{ willChange: "transform, opacity" }}
                     onLayoutAnimationComplete={() => {
                         inputRef.current?.focus();
@@ -319,7 +320,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
               <motion.div
                 initial={{ clipPath: `circle(0px at ${ringCenter.x}px ${ringCenter.y}px)` }}
                 animate={{ clipPath: `circle(4000px at ${ringCenter.x}px ${ringCenter.y}px)` }}
-                exit={{ opacity: 0, filter: "blur(20px)", transition: { duration: 0.8, ease: "easeInOut" } }}
+                exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
                 transition={{ duration: 1.5, ease: "easeInOut" }}
                 className="fixed inset-0 z-[200] flex items-center justify-center bg-[#f7f7f7]"
               >

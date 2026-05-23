@@ -103,7 +103,7 @@ export function FocusMode({ tasks, onExit, onCompleteTask }: FocusModeProps) {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 w-full mb-12">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait">
           {activeTask ? (
             <motion.div 
               key={activeTask.id}

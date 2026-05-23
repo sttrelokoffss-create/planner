@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import TextareaAutosize from 'react-textarea-autosize';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,6 +20,7 @@ export function StackView({
   onMoveToBottom, 
   onMoveToFocus 
 }: StackViewProps) {
+  const instanceId = useId();
   const [input, setInput] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -141,7 +142,7 @@ export function StackView({
           <div className="w-full h-[76px] md:h-[90px]" />
         ) : (
           <motion.div
-            layoutId="stack-add-slot"
+            layoutId={`stack-add-slot-${instanceId}`}
             style={{ willChange: "transform, opacity" }}
             whileHover={{ scale: 1.01, borderColor: "rgba(255,255,255,0.15)" }}
             whileTap={{ scale: 0.98 }}
@@ -175,7 +176,7 @@ export function StackView({
               
               <div className="fixed bottom-0 left-0 right-0 z-[150] w-full flex flex-col justify-end pointer-events-none">
                 <motion.div 
-                  layoutId="stack-add-slot"
+                  layoutId={`stack-add-slot-${instanceId}`}
                   style={{ willChange: "transform, opacity" }}
                   onLayoutAnimationComplete={() => {
                      inputRef.current?.focus();
