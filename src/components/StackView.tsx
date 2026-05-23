@@ -36,8 +36,8 @@ export function StackView({
     e.preventDefault();
     if (input.trim()) {
       onAddStackTask(input.trim());
-      setInput('');
       setIsAdding(false);
+      setTimeout(() => setInput(''), 200);
     }
   };
 
@@ -131,7 +131,13 @@ export function StackView({
                   <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-4 mb-2 shrink-0" />
                   
                   <div className="w-full relative flex flex-col pt-4 px-6 md:px-8">
-                    <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleAdd} className="flex flex-col gap-4">
+                    <motion.form 
+                      initial={{ opacity: 0, y: 10 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                      onSubmit={handleAdd} 
+                      className="flex flex-col gap-4"
+                    >
                       <div className="relative">
                         <TextareaAutosize
                           ref={inputRef}

@@ -1,5 +1,11 @@
 const webApp = window.Telegram?.WebApp || (window as any).Telegram?.WebApp;
 
+declare global {
+  interface Window {
+    Telegram?: any;
+  }
+}
+
 export const initTelegramApp = () => {
   if (!webApp) return;
   webApp.ready();

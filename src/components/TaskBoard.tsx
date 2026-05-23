@@ -112,8 +112,8 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
     }
     
     onAddTask(input.trim());
-    setInput("");
     setActiveSlotIndex(null);
+    setTimeout(() => setInput(""), 200);
   };
 
   const handleConfirmPull = () => {
@@ -246,6 +246,7 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                         <motion.div 
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, transition: { duration: 0.15 } }}
                           className="w-full bg-white text-black p-6 md:p-8 rounded-[20px] md:rounded-[24px] flex flex-col gap-6"
                         >
                            <p className="text-[18px] md:text-[22px] font-medium leading-snug">{stackTasks[0].text}</p>
@@ -265,7 +266,13 @@ export function TaskBoard({ tasks, stackTasks, onAddTask, onPullFromStack, onTog
                            </div>
                         </motion.div>
                       ) : (
-                        <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <motion.form 
+                          initial={{ opacity: 0, y: 10 }} 
+                          animate={{ opacity: 1, y: 0 }} 
+                          exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                          onSubmit={handleSubmit} 
+                          className="flex flex-col gap-4"
+                        >
                           {stackTasks.length > 0 && (
                             <button
                               type="button"

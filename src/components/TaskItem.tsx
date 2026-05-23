@@ -48,14 +48,15 @@ export const TaskItem = React.memo(({ task, onToggle, onDelete }: TaskItemProps)
         dragConstraints={{ left: -160, right: 0 }}
         dragElastic={{ left: 0.5, right: 0 }}
         onDragEnd={(e, info) => {
-          const threshold = 120;
-          if (info.offset.x < -threshold) {
+          const threshold = 50;
+          if (info.offset.x < -threshold || (info.offset.x < 0 && info.velocity.x < -200)) {
             onDelete();
           }
         }}
-        onTap={() => {
-          // Framer Motion's onTap is intelligent and only triggers if a drag did not exceed 5-6px
-          onToggle(task.id);
+        onClick={() => {
+          if (Math.abs(x.get()) < 10) {
+            onToggle(task.id);
+          }
         }}
         className={cn(
           "transform-gpu group relative flex items-center p-6 md:p-8 cursor-grab active:cursor-grabbing rounded-[20px] md:rounded-[24px] transition-colors duration-400 border z-10",

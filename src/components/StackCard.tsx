@@ -27,27 +27,26 @@ export const StackCard: React.FC<StackCardProps> = ({
   const dragY = useMotionValue(0);
 
   // Card stack dimensions and position calculations
-  const yOffset = i * 16;
-  const scale = Math.max(0.6, 1 - i * 0.08);
+  // Negative yOffset + bottom center transform makes the cards peek visibly at the top
+  const yOffset = -i * 18;
+  const scale = Math.max(0.6, 1 - i * 0.05);
 
   const handleDragEnd = (e: any, info: any) => {
     if (!isCenter) return;
     const { offset, velocity } = info;
 
-    const SWIPE_THRESHOLD_X = 50; // Ultra-light 50px threshold for effortless swiping
-    const SWIPE_THRESHOLD_Y = 50; // Ultra-light 50px threshold for effortless shuffling
-    const VELOCITY_THRESHOLD = 150; // Lowered velocity requirement to respond to quick flicks
+    const SWIPE_THRESHOLD_X = 50;
+    const SWIPE_THRESHOLD_Y = 50;
+    const VELOCITY_THRESHOLD = 150;
 
     const absX = Math.abs(offset.x);
     const absY = Math.abs(offset.y);
 
     if (absX > absY) {
-      // Horizontal swipe (X-Axis): Left (X < 0) or Right (X > 0) -> Purge / delete task
       if (absX > SWIPE_THRESHOLD_X || Math.abs(velocity.x) > VELOCITY_THRESHOLD) {
         onRemove(task.id);
       }
     } else {
-      // Vertical swipe (Y-Axis): Up (Y < 0) or Down (Y > 0) -> Shuffle front card to bottom of the stack
       if (absY > SWIPE_THRESHOLD_Y || Math.abs(velocity.y) > VELOCITY_THRESHOLD) {
         onMoveToBottom(task.id);
       }
@@ -55,24 +54,26 @@ export const StackCard: React.FC<StackCardProps> = ({
   };
 
   return (
-    <div className="absolute top-12 inset-x-0 mx-auto w-full max-w-[340px] h-[200px]" style={{ zIndex: 50 - i }}>
+    <motion.div 
+      className="absolute top-12 inset-x-0 mx-auto w-full max-w-[340px] h-[200px]" 
+      style={{ zIndex: 50 - i }}
+      initial={{ y: -60, scale: 1.05 }}
+      animate={{ y: yOffset, scale }}
+      exit={{ y: 40, scale: 0.9, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 350, damping: 32, mass: 0.5 }}
+    >
       {/* Main active card */}
       <motion.div
         style={{ 
           willChange: "transform, opacity",
-          transformOrigin: "top center",
-          x: dragX,
-          y: dragY,
+          transformOrigin: "bottom center",
           boxShadow: isCenter ? "inset 0 1px 1px rgba(255,255,255,0.12), 0 24px 50px -15px rgba(0,0,0,0.9)" : "0 10px 30px -10px rgba(0,0,0,0.8)"
         }}
-        initial={{ opacity: 0, scale: 1.05, y: -60 }}
+        initial={{ opacity: 0 }}
         animate={{ 
           opacity: 1, 
-          scale, 
-          y: yOffset,
-          zIndex: 50 - i
         }}
-        exit={{ opacity: 0, scale: 0.9, y: 40 }}
+        exit={{ opacity: 0 }}
         transition={{ type: "spring", stiffness: 350, damping: 32, mass: 0.5 }}
         className={cn(
           "transform-gpu absolute inset-x-0 mx-auto w-full h-full rounded-[32px] p-6 flex flex-col justify-center items-center text-center transition-all duration-300 select-none pb-8",
@@ -96,6 +97,6 @@ export const StackCard: React.FC<StackCardProps> = ({
           </p>
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
