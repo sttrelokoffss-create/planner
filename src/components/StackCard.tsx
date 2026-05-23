@@ -55,7 +55,7 @@ export const StackCard: React.FC<StackCardProps> = ({
       setTimeout(() => onRemove(task.id), 250);
     } else if (absY > absX && (absY > SWIPE_THRESHOLD || Math.abs(velocity.y) > VELOCITY_THRESHOLD)) {
       const direction = offset.y > 0 ? 1 : -1;
-      setExitY(direction * (window.innerHeight || 800));
+      setExitY(direction * 220);
       setTimeout(() => {
         onMoveToBottom(task.id);
         // Reset exit for the case when it goes to bottom

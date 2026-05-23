@@ -106,7 +106,7 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
   }, [recentRhythm]);
 
   return (
-    <div className="w-full h-full pb-[120px] overflow-y-auto overflow-x-hidden flex flex-col pt-12 px-6">
+    <div className="w-full h-full pb-[120px] overflow-hidden flex flex-col pt-12 px-6">
       <div className="absolute top-0 left-0 right-0 text-center pointer-events-none mt-12 z-0">
          <h2 className="text-white/20 text-[10px] md:text-[11px] font-sans tracking-[0.4em] uppercase">Operator Status</h2>
       </div>
